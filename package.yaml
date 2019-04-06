@@ -1,0 +1,37 @@
+---
+
+name:
+    build-serve
+version:
+    0.1.0.0
+synopsis:
+    Building & watching utilities for servers and clients.
+# description:
+github:
+    prikhi/build-serve
+license:
+    BSD-3-Clause
+license-file:
+    LICENSE
+author:
+    Pavan Rikhi
+maintainer:
+    pavan.rikhi@gmail.com
+copyright:
+    2019 Pavan Rikhi
+# category:
+
+extra-source-files:
+    - README.md
+    - CHANGELOG.md
+
+
+ghc-options:
+    - -pedantic
+
+
+library:
+    source-dirs:
+        src
+    dependencies:
+        - base >= 4.7 && < 5
