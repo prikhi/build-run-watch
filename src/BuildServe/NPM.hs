@@ -3,11 +3,11 @@
 
 You'll probably want to use a qualified import for this module:
 
-@
-import qualified BuildServe.NPM as NPM
 
-buildClient = NPM.install >> NPM.script "build"
-@
+> import qualified BuildServe.NPM as NPM
+>
+> buildClient = NPM.install "./client/" >> NPM.script "build" [] "./client/"
+
 
 -}
 module BuildServe.NPM
@@ -32,7 +32,7 @@ import           BuildServe.Runner              ( run
 
 -- | Install the NPM dependencies specified in the @package.json@.
 --
--- Essentially, @npm install@
+-- Essentially, @npm install@.
 install
     :: (MonadUnliftIO m, HasLogQueue m)
     => FilePath
@@ -47,7 +47,7 @@ install workingDir = installDependency "npm"
 
 -- | Run one of the @scripts@ specified in the @package.json@ file.
 --
--- Essentially, @npm run <cmd> -- <args>@
+-- Essentially, @npm run \<cmd> -- \<args>@.
 script
     :: (MonadUnliftIO m, HasLogQueue m)
     => Text
@@ -66,7 +66,7 @@ script cmd rawArgs workingDir =
 
 -- | Run a binary installed with NPM.
 --
--- Essentially, @npx <cmd> -- <args>@
+-- Essentially, @npx \<cmd> -- \<args>@.
 exec
     :: (MonadUnliftIO m, HasLogQueue m)
     => Text
