@@ -27,7 +27,11 @@ extra-source-files:
 
 
 ghc-options:
-    - -pedantic
+    - -Wall
+    - -Wcompat
+    - -Wincomplete-record-updates
+    - -Wincomplete-uni-patterns
+    - -Wredundant-constraints
 
 
 library:
