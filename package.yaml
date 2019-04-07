@@ -35,3 +35,8 @@ library:
         src
     dependencies:
         - base >= 4.7 && < 5
+        - ansi-terminal >= 0.6 && < 1
+        - lifted-async >= 0.8 && < 1
+        - monad-control >= 1 && < 2
+        - stm >= 2.4 && < 3
+        - text >= 1 && < 2
