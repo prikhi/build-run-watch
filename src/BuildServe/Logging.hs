@@ -29,33 +29,27 @@ module BuildServe.Logging
     )
 where
 
-import           Control.Concurrent.Async.Lifted.Safe
-                                                ( Async
-                                                , Forall
-                                                , Pure
-                                                , async
-                                                )
-import           Control.Concurrent.STM         ( atomically )
-import           Control.Concurrent.STM.TQueue  ( TQueue
-                                                , newTQueue
-                                                , readTQueue
-                                                , writeTQueue
-                                                )
 import           Control.Monad                  ( when
                                                 , forever
-                                                )
-import           Control.Monad.IO.Class         ( MonadIO
-                                                , liftIO
-                                                )
-import           Control.Monad.Trans.Control    ( MonadBaseControl
-                                                , control
-                                                , StM
                                                 )
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as T
 import           GHC.IO.Handle                  ( Handle
                                                 , hIsEOF
+                                                )
+import           UnliftIO                       ( MonadUnliftIO
+                                                , withRunInIO
+                                                , liftIO
+                                                )
+import           UnliftIO.Async                 ( Async
+                                                , async
+                                                )
+import           UnliftIO.STM                   ( atomically
+                                                , TQueue
+                                                , newTQueue
+                                                , readTQueue
+                                                , writeTQueue
                                                 )
 import           System.Console.ANSI            ( Color(..)
                                                 , ColorIntensity(Vivid)
@@ -75,8 +69,8 @@ import           System.Exit                    ( ExitCode(..) )
 type LogQueue = TQueue LogMessage
 
 -- | Create a new 'LogQueue'.
-newLogQueue :: MonadIO m => m LogQueue
-newLogQueue = liftIO $ atomically newTQueue
+newLogQueue :: MonadUnliftIO m => m LogQueue
+newLogQueue = atomically newTQueue
 
 
 -- | A message along with it's logging type.
@@ -123,10 +117,10 @@ class Monad m => HasLogQueue m where
 -- LOGGING
 
 -- | Add a message to the 'LogQueue'.
-logMessage :: (MonadIO m, HasLogQueue m) => LogType -> Text -> m ()
+logMessage :: (MonadUnliftIO m, HasLogQueue m) => LogType -> Text -> m ()
 logMessage logType message = do
     queue <- getLogQueue
-    liftIO . atomically . writeTQueue queue $ LogMessage
+    atomically . writeTQueue queue $ LogMessage
         { lmType    = logType
         , lmMessage = message
         }
@@ -134,19 +128,11 @@ logMessage logType message = do
 -- | Log each line of output from a 'Handle' with the given 'LogType' until
 -- the handle is closed..
 logHandle
-    :: ( MonadBaseControl IO m
-       , Forall (Pure m)
-       , MonadIO m
-       , HasLogQueue m
-       , StM m () ~ ()
-       )
-    => LogType
-    -> Handle
-    -> m (Async ())
+    :: (MonadUnliftIO m, HasLogQueue m) => LogType -> Handle -> m (Async ())
 logHandle logType handle =
-    async $ control $ \runInBase -> whileM_ (not <$> hIsEOF handle) $ do
+    async $ withRunInIO $ \runner -> whileM_ (not <$> hIsEOF handle) $ do
         line <- T.hGetLine handle
-        runInBase $ logMessage logType line
+        runner $ logMessage logType line
   where
     whileM_ :: Monad m => m Bool -> m () -> m ()
     whileM_ predicateM actionM = do
@@ -154,34 +140,18 @@ logHandle logType handle =
         when predicate $ actionM >> whileM_ predicateM actionM
 
 -- | Log output from a 'Server' 'Handle'.
-logServerOutput
-    :: ( MonadBaseControl IO m
-       , Forall (Pure m)
-       , MonadIO m
-       , HasLogQueue m
-       , StM m () ~ ()
-       )
-    => Handle
-    -> m (Async ())
+logServerOutput :: (MonadUnliftIO m, HasLogQueue m) => Handle -> m (Async ())
 logServerOutput = logHandle Server
 
 -- | Log output from a 'Client' 'Handle'.
-logClientOutput
-    :: ( MonadBaseControl IO m
-       , Forall (Pure m)
-       , MonadIO m
-       , HasLogQueue m
-       , StM m () ~ ()
-       )
-    => Handle
-    -> m (Async ())
+logClientOutput :: (MonadUnliftIO m, HasLogQueue m) => Handle -> m (Async ())
 logClientOutput = logHandle Client
 
 
 -- | Depending on the ExitCode of a command, either log some success text
 -- or failure text.
 logExitStatus
-    :: (MonadIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, HasLogQueue m)
     => Text
     -- ^ Success Message
     -> Text
@@ -203,9 +173,9 @@ logExitStatus successText failureText exitCode = case exitCode of
 -- bolded and colored.
 --
 -- TODO: Config value for custom formatting function.
-printLogMessage :: MonadIO m => LogQueue -> m ()
+printLogMessage :: MonadUnliftIO m => LogQueue -> m ()
 printLogMessage q = do
-    msg <- liftIO . atomically $ readTQueue q
+    msg <- atomically $ readTQueue q
     liftIO $ do
         setSGR [Reset]
         T.putStr "["
@@ -231,9 +201,7 @@ printLogMessage q = do
 
 -- | Forks an Async computation that constantly reads from the 'LogQueue'
 -- and prints messages to stdout.
-forkOutputLogger
-    :: (MonadBaseControl IO m, Forall (Pure m), HasLogQueue m, MonadIO m)
-    => m (Async ())
+forkOutputLogger :: (MonadUnliftIO m, HasLogQueue m) => m (Async ())
 forkOutputLogger = do
     queue <- getLogQueue
     async $ forever $ printLogMessage queue
