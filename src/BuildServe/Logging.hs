@@ -108,6 +108,9 @@ paddingLength logType = maximumLogTypeLength - length (show logType)
 
 
 -- | A monad with a LogQueue in it's context.
+--
+-- TODO: Rename to Loggable or something and make HasLogQueue be for Env.
+-- Make instance for (HasLogQueue env) => ReaderT env m.
 class Monad m => HasLogQueue m where
     -- | Get the 'LogQueue'
     getLogQueue :: m LogQueue
@@ -126,7 +129,7 @@ logMessage logType message = do
         }
 
 -- | Log each line of output from a 'Handle' with the given 'LogType' until
--- the handle is closed..
+-- the handle is closed.
 logHandle
     :: (MonadUnliftIO m, HasLogQueue m) => LogType -> Handle -> m (Async ())
 logHandle logType handle =
