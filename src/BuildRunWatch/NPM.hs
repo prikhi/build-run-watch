@@ -3,12 +3,12 @@
 
 You'll probably want to use a qualified import for this module:
 
-> import qualified BuildServe.NPM as NPM
+> import qualified BuildRunWatch.NPM as NPM
 >
 > buildClient = NPM.install "./client/" >> NPM.script "build" [] "./client/"
 
 -}
-module BuildServe.NPM
+module BuildRunWatch.NPM
     ( install
     , script
     , exec
@@ -20,10 +20,10 @@ import qualified Data.Text                     as T
 import           UnliftIO                       ( MonadUnliftIO )
 import           System.Exit                    ( ExitCode(..) )
 
-import           BuildServe.Logging             ( HasLogQueue
+import           BuildRunWatch.Logging          ( HasLogQueue
                                                 , logClientOutput
                                                 )
-import           BuildServe.Runner              ( run
+import           BuildRunWatch.Runner           ( run
                                                 , installDependency
                                                 )
 

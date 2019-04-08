@@ -3,12 +3,12 @@
 
 You'll probably want to use a qualified import for this module:
 
-> import qualified BuildServe.Stack as Stack
+> import qualified BuildRunWatch.Stack as Stack
 >
 > installGhcForServer = Stack.setup [] "./server/" logServerOutput
 
 -}
-module BuildServe.Stack
+module BuildRunWatch.Stack
     ( setup
     , buildDependencies
     , build
@@ -22,8 +22,8 @@ import           UnliftIO                       ( MonadUnliftIO )
 import           UnliftIO.Async                 ( Async )
 import           System.Exit                    ( ExitCode )
 
-import           BuildServe.Logging             ( HasLogQueue )
-import           BuildServe.Runner              ( installDependency
+import           BuildRunWatch.Logging          ( HasLogQueue )
+import           BuildRunWatch.Runner           ( installDependency
                                                 , run
                                                 )
 

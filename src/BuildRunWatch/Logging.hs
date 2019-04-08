@@ -8,7 +8,7 @@ read from a separate thread which is responsible for printing messages to
 the console or rendering them in a UI.
 
 -}
-module BuildServe.Logging
+module BuildRunWatch.Logging
     ( -- * Logging Types
       LogQueue
     , newLogQueue

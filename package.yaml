@@ -1,14 +1,14 @@
 ---
 
 name:
-    build-serve
+    build-run-watch
 version:
     0.1.0.0
 synopsis:
-    Building & watching utilities for servers and clients.
+    Building, Running & Watching Utilities for Servers and Clients.
 # description:
 github:
-    prikhi/build-serve
+    prikhi/build-run-watch
 license:
     BSD-3-Clause
 license-file:

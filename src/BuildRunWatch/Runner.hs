@@ -4,7 +4,7 @@
 TODO: Use the pathtype package to accept typed relative paths for the
       working directories.
 -}
-module BuildServe.Runner
+module BuildRunWatch.Runner
     ( run
     , installDependency
     , removeFiles
@@ -34,7 +34,7 @@ import           UnliftIO.Async                 ( Async
                                                 , cancel
                                                 )
 
-import           BuildServe.Logging             ( LogType(..)
+import           BuildRunWatch.Logging          ( LogType(..)
                                                 , HasLogQueue
                                                 , logMessage
                                                 , logExitStatus
