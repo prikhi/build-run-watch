@@ -27,12 +27,12 @@ executables, and watch source files for changes(triggering re-builds).
 I have a few projects that are Haskell servers & Javascript/Elm/Purescript
 clients. This usually means building & serving takes up 2-3 terminals. One for
 building/running the Haskell project, one for building/watching the Client
-code, and one for watching/serving/hot-reloading the Client code. 
+code, and one for watching/serving/hot-reloading the Client code.
 
 Instead of using three terminals and splitting my attention between them all, I
 would usually write a Haskell script that launches all the processes & restarts
 them when their configuration changes(e.g., `stack.yaml`, `webpack.config.js`,
-& `package.json`). 
+& `package.json`).
 
 After essentially re-writing the same script multiple times, I decided to build
 this library to keep me from repeating myself & allow upgrades in future
