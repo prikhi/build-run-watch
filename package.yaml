@@ -63,8 +63,10 @@ ghc-options:
 library:
     source-dirs:
         src
+    other-modules:
+        - Paths_build_run_watch
     dependencies:
-        - base >= 4.7 && < 5
+        - base >= 4.11 && < 5
         - ansi-terminal >= 0.6 && < 1
         - fsnotify >= 0.1 && < 1
         - mtl >= 2.1 && < 3
