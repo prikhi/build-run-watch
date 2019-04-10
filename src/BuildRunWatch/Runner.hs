@@ -34,9 +34,8 @@ import           UnliftIO.Async                 ( Async
                                                 , cancel
                                                 )
 
-import           BuildRunWatch.Logging          ( LogType(..)
-                                                , HasLogQueue
-                                                , logMessage
+import           BuildRunWatch.Logging          ( MonadLoggable(..)
+                                                , LogType(..)
                                                 , logExitStatus
                                                 )
 
@@ -82,7 +81,7 @@ run cmd args workingDir outputLogger =
 -- @Installing NPM Dependencies@ & a 'Success' message of @NPM Dependencies
 -- Installed@.
 installDependency
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => FilePath
     -- ^ The command to run
     -> [String]
@@ -112,7 +111,7 @@ installDependency cmd args workingDir outputLogger description = do
 -- TODO: There's probably a removeFile/removeDirectory function that we
 -- could use instead of relying on the existence of an @rm@ command.
 removeFiles
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => FilePath
     -- ^ The directory to remove files from
     -> [FilePath]

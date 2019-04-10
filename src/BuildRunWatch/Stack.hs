@@ -22,7 +22,7 @@ import           UnliftIO                       ( MonadUnliftIO )
 import           UnliftIO.Async                 ( Async )
 import           System.Exit                    ( ExitCode )
 
-import           BuildRunWatch.Logging          ( HasLogQueue )
+import           BuildRunWatch.Logging          ( MonadLoggable )
 import           BuildRunWatch.Runner           ( installDependency
                                                 , run
                                                 )
@@ -32,7 +32,7 @@ import           BuildRunWatch.Runner           ( installDependency
 --
 -- Analogous to @stack setup@.
 setup
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => [String]
     -- ^ Additional arguments to pass to @stack setup@
     -> FilePath
@@ -52,7 +52,7 @@ setup extraArgs workingDir outputLogger = installDependency
 --
 -- Analogous to @stack build --only-dependencies@.
 buildDependencies
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => [String]
     -- ^ Additional arguments to pass to @stack build@
     -> FilePath

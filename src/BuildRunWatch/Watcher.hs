@@ -41,9 +41,8 @@ import           System.FSNotify                ( Debounce(Debounce)
                                                 , watchTree
                                                 )
 
-import           BuildRunWatch.Logging          ( HasLogQueue
+import           BuildRunWatch.Logging          ( MonadLoggable(..)
                                                 , LogType(..)
-                                                , logMessage
                                                 )
 
 
@@ -67,7 +66,7 @@ import           BuildRunWatch.Logging          ( HasLogQueue
 -- The description argument is used for logging various stages - "Watching
 -- Server", "Server Build Successful", "Server Restarted", etc.
 watch
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => Text
     -- ^ Description of the watcher
     -> FilePath
@@ -135,7 +134,7 @@ watch description watchDirectory initializeFilter fileFilter initializeAction bu
         asyncAction <- async action
         atomically $ writeTVar tvar $ Just asyncAction
     cancelAndClearTVar
-        :: (MonadUnliftIO m, HasLogQueue m)
+        :: (MonadUnliftIO m, MonadLoggable m)
         => TVar (Maybe (Async a))
         -> Text
         -> m ()

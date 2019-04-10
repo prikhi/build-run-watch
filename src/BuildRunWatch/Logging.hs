@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-| Logging-related types & functions for build scripts.
@@ -18,7 +19,7 @@ module BuildRunWatch.Logging
     , paddingLength
     , HasLogQueue(..)
       -- * Logging Messages
-    , logMessage
+    , MonadLoggable(..)
     , logHandle
     , logServerOutput
     , logClientOutput
@@ -31,6 +32,10 @@ where
 
 import           Control.Monad                  ( when
                                                 , forever
+                                                )
+import           Control.Monad.Reader           ( MonadReader
+                                                , ReaderT
+                                                , asks
                                                 )
 import           Data.Text                      ( Text )
 import qualified Data.Text                     as T
@@ -107,31 +112,36 @@ paddingLength :: LogType -> Int
 paddingLength logType = maximumLogTypeLength - length (show logType)
 
 
--- | A monad with a LogQueue in it's context.
---
--- TODO: Rename to Loggable or something and make HasLogQueue be for Env.
--- Make instance for (HasLogQueue env) => ReaderT env m.
-class Monad m => HasLogQueue m where
+-- | Grab a 'LogQueue' from some environment.
+class HasLogQueue env where
     -- | Get the 'LogQueue'
-    getLogQueue :: m LogQueue
+    getLogQueue :: env -> LogQueue
 
+instance HasLogQueue (TQueue LogMessage) where
+    getLogQueue = id
+
+
+-- | A monad with the ability to log messages.
+class Monad m => MonadLoggable m where
+    -- | Log a message tagged with a 'LogType'.
+    logMessage :: LogType -> Text -> m ()
+
+-- | Write the message to a 'LogQueue'.
+instance (MonadUnliftIO m, HasLogQueue env) => MonadLoggable (ReaderT env m) where
+    logMessage logType message = do
+        queue <- asks getLogQueue
+        atomically . writeTQueue queue $ LogMessage
+            { lmType    = logType
+            , lmMessage = message
+            }
 
 
 -- LOGGING
 
--- | Add a message to the 'LogQueue'.
-logMessage :: (MonadUnliftIO m, HasLogQueue m) => LogType -> Text -> m ()
-logMessage logType message = do
-    queue <- getLogQueue
-    atomically . writeTQueue queue $ LogMessage
-        { lmType    = logType
-        , lmMessage = message
-        }
-
 -- | Log each line of output from a 'Handle' with the given 'LogType' until
 -- the handle is closed.
 logHandle
-    :: (MonadUnliftIO m, HasLogQueue m) => LogType -> Handle -> m (Async ())
+    :: (MonadUnliftIO m, MonadLoggable m) => LogType -> Handle -> m (Async ())
 logHandle logType handle =
     async $ withRunInIO $ \runner -> whileM_ (not <$> hIsEOF handle) $ do
         line <- T.hGetLine handle
@@ -143,18 +153,18 @@ logHandle logType handle =
         when predicate $ actionM >> whileM_ predicateM actionM
 
 -- | Log output from a 'Server' 'Handle'.
-logServerOutput :: (MonadUnliftIO m, HasLogQueue m) => Handle -> m (Async ())
+logServerOutput :: (MonadUnliftIO m, MonadLoggable m) => Handle -> m (Async ())
 logServerOutput = logHandle Server
 
 -- | Log output from a 'Client' 'Handle'.
-logClientOutput :: (MonadUnliftIO m, HasLogQueue m) => Handle -> m (Async ())
+logClientOutput :: (MonadUnliftIO m, MonadLoggable m) => Handle -> m (Async ())
 logClientOutput = logHandle Client
 
 
 -- | Depending on the ExitCode of a command, either log some success text
 -- or failure text.
 logExitStatus
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: MonadLoggable m
     => Text
     -- ^ Success Message
     -> Text
@@ -204,7 +214,8 @@ printLogMessage q = do
 
 -- | Forks an Async computation that constantly reads from the 'LogQueue'
 -- and prints messages to stdout.
-forkOutputLogger :: (MonadUnliftIO m, HasLogQueue m) => m (Async ())
+forkOutputLogger
+    :: (MonadUnliftIO m, MonadReader env m, HasLogQueue env) => m (Async ())
 forkOutputLogger = do
-    queue <- getLogQueue
+    queue <- asks getLogQueue
     async $ forever $ printLogMessage queue

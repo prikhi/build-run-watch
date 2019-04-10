@@ -20,7 +20,7 @@ import qualified Data.Text                     as T
 import           UnliftIO                       ( MonadUnliftIO )
 import           System.Exit                    ( ExitCode(..) )
 
-import           BuildRunWatch.Logging          ( HasLogQueue
+import           BuildRunWatch.Logging          ( MonadLoggable
                                                 , logClientOutput
                                                 )
 import           BuildRunWatch.Runner           ( run
@@ -32,7 +32,7 @@ import           BuildRunWatch.Runner           ( run
 --
 -- Analogous to @npm install@.
 install
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => FilePath
     -- ^ The client project's working directory
     -> m ()
@@ -47,7 +47,7 @@ install workingDir = installDependency "npm"
 --
 -- Analogous to @npm run \<cmd> -- \<args>@.
 script
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => Text
     -- ^ The script to run
     -> [Text]
@@ -66,7 +66,7 @@ script cmd rawArgs workingDir =
 --
 -- Analogous to @npx \<cmd> -- \<args>@.
 exec
-    :: (MonadUnliftIO m, HasLogQueue m)
+    :: (MonadUnliftIO m, MonadLoggable m)
     => Text
     -- ^ The command to run
     -> [Text]
