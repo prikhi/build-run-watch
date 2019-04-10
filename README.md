@@ -1,5 +1,7 @@
 # Build, Run, Watch
 
+[![BuildRunWatch Build Status](https://travis-ci.org/prikhi/build-run-watch.svg?branch=master)](https://travis-ci.org/prikhi/build-run-watch)
+
 Building, running, & watching utilities for projects with a server & client.
 
 You can use this library to help you write scripts that build projects, run
