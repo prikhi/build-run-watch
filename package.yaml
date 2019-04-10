@@ -43,3 +43,4 @@ library:
         - text >= 1 && < 2
         - typed-process >= 0.1 && < 1
         - unliftio >= 0.2.1 && < 1
+        - fsnotify >= 0.1 && < 1

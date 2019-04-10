@@ -8,7 +8,6 @@ executables, and watch source files for changes(triggering re-builds).
 
 ## TODO
 
-* Watcher module for watching files and running/re-running commands.
 * Purescript/Spago Module.
 * Ghcid & Pscid modules w/ datatypes for arguments to pass. Ghcid should write
   json to file, we watch the file, parse the json & log it. Pscid should be
@@ -17,6 +16,7 @@ executables, and watch source files for changes(triggering re-builds).
 * BuildRunWatch top-level module with high-level functionality. You should be
   able to pass some spec to the main function in this module and it will handle
   argument parsing, building, watching, and help text printing.
+* Comprehensive usage documentation.
 * Brick UI with single window or split client/server panes, shortcuts for
   forcing rebuilds or restarting watchers, build result indicators,
   scrollable-logs, etc.
