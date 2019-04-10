@@ -63,7 +63,7 @@ ghc-options:
 library:
     source-dirs:
         src
-    other-modules:
+    generated-other-modules:
         - Paths_build_run_watch
     dependencies:
         - base >= 4.11 && < 5
