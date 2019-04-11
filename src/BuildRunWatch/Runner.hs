@@ -6,6 +6,7 @@ TODO: Use the pathtype package to accept typed relative paths for the
 -}
 module BuildRunWatch.Runner
     ( run
+    , runInteractive
     , installDependency
     , removeFiles
     )
@@ -22,6 +23,7 @@ import           System.Process.Typed           ( proc
                                                 , setStdout
                                                 , getStderr
                                                 , setStderr
+                                                , setDelegateCtlc
                                                 , createPipe
                                                 , withProcess
                                                 , waitExitCode
@@ -72,6 +74,21 @@ run cmd args workingDir outputLogger =
             cancel errorThread
             return exitCode
 
+
+-- | Run an interactive process, passing through all input/output streams.
+runInteractive
+    :: MonadUnliftIO m
+    => FilePath
+    -- ^ The command to run
+    -> [String]
+    -- ^ Arguments to pass to the command
+    -> FilePath
+    -- ^ The working directory to run the command in
+    -> m ExitCode
+runInteractive cmd args workingDir =
+    let processConfig =
+            proc cmd args & setWorkingDir workingDir & setDelegateCtlc True
+    in  withRunInIO $ \_ -> withProcess processConfig waitExitCode
 
 -- | Install a dependency via a command, arguments, and working directory.
 --
