@@ -6,7 +6,7 @@ version:
     0.1.0.0
 synopsis:
     Building, Running & Watching Utilities for Servers and Clients.
-description: >
+description: |
     A package for writing project build tools and management scripts.
 
     build-run-watch exposes types and functions to facilitate management &
@@ -18,8 +18,8 @@ description: >
     client, start/serve them, and then re-build & re-launch them when their
     source files change.
 
-    Building output is prettily printed with Client/Server/Info/Failure/Success
-    tags.
+    Building output is prettily printed with
+    Client\/Server\/Info\/Failure\/Success tags.
 
     Currently, only various low-level utilities are exposed for running
     commands, installing dependencies, logging output, and watching
@@ -28,7 +28,7 @@ description: >
 
     An eventual goal is to present a management function that takes a
     build/watch configuration and generates a CLI application that exposes some
-    fixed functionality(production builds, dev/watch mode, cleaning, launching
+    fixed functionality(production builds, dev\/watch mode, cleaning, launching
     REPLs, help text, etc.). Also desired is a TUI mode that shows the logs in
     a Brick UI, allowing you to manually kick off builds or restart the
     watchers.
