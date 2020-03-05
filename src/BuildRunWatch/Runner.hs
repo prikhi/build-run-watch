@@ -25,7 +25,7 @@ import           System.Process.Typed           ( proc
                                                 , setStderr
                                                 , setDelegateCtlc
                                                 , createPipe
-                                                , withProcess
+                                                , withProcessWait
                                                 , waitExitCode
                                                 )
 import           UnliftIO                       ( MonadUnliftIO
@@ -62,11 +62,11 @@ run
     -> m ExitCode
 run cmd args workingDir outputLogger =
     let processConfig =
-            proc cmd args
-                & setWorkingDir workingDir
-                & setStdout createPipe
-                & setStderr createPipe
-    in  withRunInIO $ \runner -> withProcess processConfig $ \process -> do
+                proc cmd args
+                    & setWorkingDir workingDir
+                    & setStdout createPipe
+                    & setStderr createPipe
+    in  withRunInIO $ \runner -> withProcessWait processConfig $ \process -> do
             outputThread <- runner . outputLogger $ getStdout process
             errorThread  <- runner . outputLogger $ getStderr process
             exitCode     <- waitExitCode process
@@ -87,8 +87,8 @@ runInteractive
     -> m ExitCode
 runInteractive cmd args workingDir =
     let processConfig =
-            proc cmd args & setWorkingDir workingDir & setDelegateCtlc True
-    in  withRunInIO $ \_ -> withProcess processConfig waitExitCode
+                proc cmd args & setWorkingDir workingDir & setDelegateCtlc True
+    in  withRunInIO $ \_ -> withProcessWait processConfig waitExitCode
 
 -- | Install a dependency via a command, arguments, and working directory.
 --
